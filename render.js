@@ -14,7 +14,7 @@ const VIDEO_WIDTH = 1920;
 const VIDEO_HEIGHT = 1080;
 const VIDEO_FPS = 30;
 const COMPOSITION_ID = "EducationalVideo";
-const AUDIO_URL = "https://raw.githubusercontent.com/gilo-hub/gilo-hub.github.io/main/assets/history-of-ethiopia.mp3"; // Stable URL for the audio
+const AUDIO_URL = "https://github.com/GetyeTek/wordwise-images/blob/00d4db02f9d2c3d1cf8bda0395637c38ea46aaec/history-of-ethiopia.mp3"; // Stable URL for the audio
 const OUTPUT_FILE = "output.mp4";
 
 // --- Word/Phrase Timestamps (The Key to "Peak" Synchronization) ---
