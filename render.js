@@ -5,9 +5,9 @@
 const { bundle } = require("@remotion/bundler");
 const { getCompositions, renderMedia } = require("@remotion/renderer");
 const path = require("path");
-const fs = require("fs/promises");
+const fs = require("fs/promises"); // This is correct, we'll make the download function compatible
 const os = require("os");
-const http = require('https');
+// const http = require('http'); // We no longer need the old http module
 
 // --- Configuration ---
 const VIDEO_WIDTH = 1920;
@@ -18,7 +18,6 @@ const AUDIO_URL = "https://raw.githubusercontent.com/gilo-hub/gilo-hub.github.io
 const OUTPUT_FILE = "output.mp4";
 
 // --- Word/Phrase Timestamps (The Key to "Peak" Synchronization) ---
-// In a real project, this would come from an AI speech-to-text API.
 const SUBTITLES = [
     { start: 1.1, end: 4.8, text: "History of Ethiopia and the Horn, Unit 1" },
     { start: 5.2, end: 11.9, text: "Let's make it simple, like a friend talking, without skipping the main points." },
@@ -176,7 +175,6 @@ export const ${COMPOSITION_ID} = () => {
 const performRender = async () => {
     console.log("Starting video render process...");
 
-    // Create a temporary directory to store our dynamically created Remotion project
     const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'remotion-'));
     console.log(`Created temporary directory: ${tempDir}`);
 
@@ -187,14 +185,12 @@ const performRender = async () => {
     const publicDir = path.join(tempDir, 'public');
     await fs.mkdir(publicDir);
 
-    // Download the audio file
     console.log(`Downloading audio from ${AUDIO_URL}...`);
     const audioFilePath = path.join(publicDir, 'audio.mp3');
-    await downloadFile(AUDIO_URL, audioFilePath);
+    await downloadFile(AUDIO_URL, audioFilePath); // Using the new function
     console.log("Audio downloaded successfully.");
 
     try {
-        // Bundle the React code into a format Remotion can render
         console.log("Bundling Remotion project...");
         const bundleLocation = await bundle({
             entryPoint,
@@ -202,10 +198,8 @@ const performRender = async () => {
             webpackOverride: (config) => config,
         });
 
-        // Get metadata about the compositions in our bundled project
         console.log("Getting compositions...");
         const comps = await getCompositions(bundleLocation, {
-             // We need to provide the public dir for static files like our audio
             serveAssetsFrom: publicDir
         });
         const video = comps.find((c) => c.id === COMPOSITION_ID);
@@ -213,44 +207,39 @@ const performRender = async () => {
             throw new Error(`Composition "${COMPOSITION_ID}" not found.`);
         }
 
-        // Render the media!
         console.log("Rendering video... This may take a few minutes.");
         await renderMedia({
             composition: video,
             serveUrl: bundleLocation,
             codec: "h264",
             outputLocation: OUTPUT_FILE,
-            inputProps: {}, // No props needed for this video
+            inputProps: {},
             logLevel: 'verbose',
         });
         console.log(`Render complete! Video saved to ${OUTPUT_FILE}`);
 
     } finally {
-        // Clean up the temporary directory
         await fs.rm(tempDir, { recursive: true, force: true });
         console.log("Cleaned up temporary files.");
     }
 };
 
-// Helper function to download a file
-const downloadFile = (url, dest) => new Promise((resolve, reject) => {
-    const file = fs.createWriteStream(dest, { flags: "wx" });
-    http.get(url, (response) => {
-        if (response.statusCode === 200) {
-            response.pipe(file);
-        } else {
-            file.close();
-            fs.unlink(dest, () => {}); // Asynchronously remove file
-            reject(`Server responded with ${response.statusCode}: ${response.statusMessage}`);
+// ====================================================================================
+// THE FIX IS HERE: A new, modern download function using fetch()
+// ====================================================================================
+const downloadFile = async (url, dest) => {
+    try {
+        const response = await fetch(url);
+        if (!response.ok) {
+            throw new Error(`Server responded with ${response.status}: ${response.statusText}`);
         }
-        file.on("finish", () => resolve());
-        file.on("error", (err) => {
-            file.close();
-            fs.unlink(dest, () => {}); // Asynchronously remove file
-            reject(err.message);
-        });
-    }).on('error', (err) => reject(err.message));
-});
+        const arrayBuffer = await response.arrayBuffer();
+        const buffer = Buffer.from(arrayBuffer);
+        await fs.writeFile(dest, buffer);
+    } catch (error) {
+        throw new Error(`Failed to download file: ${error.message}`);
+    }
+};
 
 
 // Execute the render
