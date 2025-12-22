@@ -13,14 +13,10 @@ const VIDEO_WIDTH = 1920;
 const VIDEO_HEIGHT = 1080;
 const VIDEO_FPS = 30;
 const COMPOSITION_ID = "EducationalVideo";
-
-// ====================================================================================
-// FIX #1: Use the correct "raw" URL for the audio file, not the GitHub page URL.
-// ====================================================================================
 const AUDIO_URL = "https://raw.githubusercontent.com/GetyeTek/wordwise-images/main/history-of-ethiopia.mp3";
 const OUTPUT_FILE = "output.mp4";
 
-// --- Word/Phrase Timestamps (The Key to "Peak" Synchronization) ---
+// --- Word/Phrase Timestamps ---
 const SUBTITLES = [
     { start: 1.1, end: 4.8, text: "History of Ethiopia and the Horn, Unit 1" },
     { start: 5.2, end: 11.9, text: "Let's make it simple, like a friend talking, without skipping the main points." },
@@ -36,16 +32,13 @@ const SUBTITLES = [
     { start: 101.5, end: 106.0, text: "It's the study of how humans interacted with their environment over time." },
     { start: 106.8, end: 117.5, text: "While Sociology studies society NOW (a snapshot), History studies CHANGE and CONTINUITY over time." },
 ];
-const VIDEO_DURATION_IN_SECONDS = 80; // Manually set based on audio length
+const VIDEO_DURATION_IN_SECONDS = 80;
 const VIDEO_DURATION_IN_FRAMES = VIDEO_DURATION_IN_SECONDS * VIDEO_FPS;
 
 
 // --- The React Components (The Visuals of the Video) ---
 const reactComponentCode = `
 import {
-    // ====================================================================================
-    // FIX #2: Import the 'registerRoot' function from Remotion.
-    // ====================================================================================
     registerRoot,
     AbsoluteFill,
     Sequence,
@@ -106,12 +99,15 @@ const PastVsHistoryScene = () => {
     return (
         <AbsoluteFill style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center', backgroundColor: '#1a1a1a', padding: '50px', transform: \`translateX(\${slideIn}%)\` }}>
             <div style={{ flex: 1, textAlign: 'center', border: '5px dashed #555', padding: 20, borderRadius: 15 }}>
-                <Title text="🌫️ The PAST" style={{ fontSize: '4em' }}/>
+                {/* ================================================================== */}
+                {/* FIX: Emojis removed from the text prop to prevent parsing errors */}
+                {/* ================================================================== */}
+                <Title text="The PAST" style={{ fontSize: '4em' }}/>
                 <Subtitle text="Everything that happened. Unorganized." style={{ fontSize: '2em' }}/>
             </div>
             <div style={{ fontSize: '8em', color: '#d4af37', margin: '0 40px' }}>➡️</div>
             <div style={{ flex: 1, textAlign: 'center', border: '5px solid #d4af37', padding: 20, borderRadius: 15 }}>
-                <Title text="✍️ HISTORY" style={{ fontSize: '4em' }}/>
+                <Title text="HISTORY" style={{ fontSize: '4em' }}/>
                 <Subtitle text="The organized study of the past." style={{ fontSize: '2em' }}/>
             </div>
         </AbsoluteFill>
@@ -155,9 +151,6 @@ export const ${COMPOSITION_ID} = () => {
     );
 };
 
-// ====================================================================================
-// FIX #3: Call registerRoot with our main component to satisfy the bundler.
-// ====================================================================================
 registerRoot(${COMPOSITION_ID});
 `;
 
@@ -203,7 +196,7 @@ const performRender = async () => {
         await renderMedia({
             composition: video,
             serveUrl: bundleLocation,
-            codec: "h264",
+            codec: "h24",
             outputLocation: OUTPUT_FILE,
             inputProps: {},
             logLevel: 'verbose',
