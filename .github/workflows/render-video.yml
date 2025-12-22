@@ -8,13 +8,13 @@ jobs:
   render_video:
     runs-on: ubuntu-latest
     steps:
-      # 1. Check out the repository code so our script is available
+      # 1. Check out the repository code (Updated to v4)
       - name: Check out repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      # 2. Set up Node.js environment
+      # 2. Set up Node.js environment (Updated to v4)
       - name: Set up Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: '18'
           cache: 'npm'
@@ -30,13 +30,12 @@ jobs:
         run: npm install
 
       # 5. Run the main rendering script
-      # This is where the magic happens!
       - name: Run the Remotion rendering script
         run: npm run render
 
-      # 6. Upload the final video file as an artifact
+      # 6. Upload the final video file as an artifact (Updated to v4 - THE FIX)
       - name: Upload video artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: video-artifact
           path: output.mp4
