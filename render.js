@@ -5,16 +5,19 @@
 const { bundle } = require("@remotion/bundler");
 const { getCompositions, renderMedia } = require("@remotion/renderer");
 const path = require("path");
-const fs = require("fs/promises"); // This is correct, we'll make the download function compatible
+const fs = require("fs/promises");
 const os = require("os");
-// const http = require('http'); // We no longer need the old http module
 
 // --- Configuration ---
 const VIDEO_WIDTH = 1920;
 const VIDEO_HEIGHT = 1080;
 const VIDEO_FPS = 30;
 const COMPOSITION_ID = "EducationalVideo";
-const AUDIO_URL = "https://github.com/GetyeTek/wordwise-images/blob/00d4db02f9d2c3d1cf8bda0395637c38ea46aaec/history-of-ethiopia.mp3"; // Stable URL for the audio
+
+// ====================================================================================
+// FIX #1: Use the correct "raw" URL for the audio file, not the GitHub page URL.
+// ====================================================================================
+const AUDIO_URL = "https://raw.githubusercontent.com/GetyeTek/wordwise-images/main/history-of-ethiopia.mp3";
 const OUTPUT_FILE = "output.mp4";
 
 // --- Word/Phrase Timestamps (The Key to "Peak" Synchronization) ---
@@ -38,9 +41,12 @@ const VIDEO_DURATION_IN_FRAMES = VIDEO_DURATION_IN_SECONDS * VIDEO_FPS;
 
 
 // --- The React Components (The Visuals of the Video) ---
-// We define our entire Remotion video as a string of TypeScript/JSX code.
 const reactComponentCode = `
 import {
+    // ====================================================================================
+    // FIX #2: Import the 'registerRoot' function from Remotion.
+    // ====================================================================================
+    registerRoot,
     AbsoluteFill,
     Sequence,
     useCurrentFrame,
@@ -61,7 +67,6 @@ const Subtitle = ({ text, style }) => (
 );
 const Word = ({ children, style }) => <span style={{ display: 'inline-block', ...style }}>{children}</span>;
 
-// Hook to find the currently spoken phrase
 const useCurrentSubtitle = () => {
     const frame = useCurrentFrame();
     const { fps } = useVideoConfig();
@@ -70,8 +75,6 @@ const useCurrentSubtitle = () => {
 };
 
 // --- SCENES ---
-
-// Scene 1: Title
 const TitleScene = () => {
     const frame = useCurrentFrame();
     const opacity = interpolate(frame, [0, 30, 90, 120], [0, 1, 1, 0]);
@@ -83,11 +86,8 @@ const TitleScene = () => {
         </AbsoluteFill>
     );
 };
-
-// Scene 2: Greek Etymology
 const GreekScene = () => {
     const frame = useCurrentFrame();
-    const springIn = spring({ frame: frame - 10, fps: 30, durationInFrames: 60 });
     const word = "ΙΣΤΟΡΙΑ";
     return (
         <AbsoluteFill style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column', backgroundColor: '#111' }}>
@@ -100,8 +100,6 @@ const GreekScene = () => {
         </AbsoluteFill>
     );
 }
-
-// Scene 3: Past vs History
 const PastVsHistoryScene = () => {
     const frame = useCurrentFrame();
     const slideIn = interpolate(frame, [0, 30], [-100, 0], { extrapolateRight: 'clamp' });
@@ -119,8 +117,6 @@ const PastVsHistoryScene = () => {
         </AbsoluteFill>
     );
 }
-
-// Scene 4: Change & Continuity
 const ChangeScene = () => {
     const frame = useCurrentFrame();
     const { fps } = useVideoConfig();
@@ -143,20 +139,11 @@ export const ${COMPOSITION_ID} = () => {
         <AbsoluteFill style={{ backgroundColor: '#1a1a1a' }}>
             <Audio src={staticFile('audio.mp3')} />
             
-            <Sequence from={0} durationInFrames={12 * VIDEO_FPS}>
-                <TitleScene />
-            </Sequence>
-            <Sequence from={25 * VIDEO_FPS} durationInFrames={10 * VIDEO_FPS}>
-                <GreekScene />
-            </Sequence>
-            <Sequence from={36 * VIDEO_FPS} durationInFrames={21 * VIDEO_FPS}>
-                <PastVsHistoryScene />
-            </Sequence>
-            <Sequence from={57 * VIDEO_FPS}>
-                <ChangeScene />
-            </Sequence>
+            <Sequence from={0} durationInFrames={12 * VIDEO_FPS}><TitleScene /></Sequence>
+            <Sequence from={25 * VIDEO_FPS} durationInFrames={10 * VIDEO_FPS}><GreekScene /></Sequence>
+            <Sequence from={36 * VIDEO_FPS} durationInFrames={21 * VIDEO_FPS}><PastVsHistoryScene /></Sequence>
+            <Sequence from={57 * VIDEO_FPS}><ChangeScene /></Sequence>
 
-            {/* Subtitle Overlay */}
             <AbsoluteFill style={{ justifyContent: 'flex-end', alignItems: 'center', paddingBottom: '50px' }}>
                 {currentSubtitle && (
                     <div style={{ backgroundColor: 'rgba(0,0,0,0.7)', padding: '10px 20px', borderRadius: 10 }}>
@@ -167,6 +154,11 @@ export const ${COMPOSITION_ID} = () => {
         </AbsoluteFill>
     );
 };
+
+// ====================================================================================
+// FIX #3: Call registerRoot with our main component to satisfy the bundler.
+// ====================================================================================
+registerRoot(${COMPOSITION_ID});
 `;
 
 /**
@@ -187,7 +179,7 @@ const performRender = async () => {
 
     console.log(`Downloading audio from ${AUDIO_URL}...`);
     const audioFilePath = path.join(publicDir, 'audio.mp3');
-    await downloadFile(AUDIO_URL, audioFilePath); // Using the new function
+    await downloadFile(AUDIO_URL, audioFilePath);
     console.log("Audio downloaded successfully.");
 
     try {
@@ -224,9 +216,6 @@ const performRender = async () => {
     }
 };
 
-// ====================================================================================
-// THE FIX IS HERE: A new, modern download function using fetch()
-// ====================================================================================
 const downloadFile = async (url, dest) => {
     try {
         const response = await fetch(url);
@@ -240,7 +229,6 @@ const downloadFile = async (url, dest) => {
         throw new Error(`Failed to download file: ${error.message}`);
     }
 };
-
 
 // Execute the render
 performRender().catch((err) => {
