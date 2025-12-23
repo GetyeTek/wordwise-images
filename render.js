@@ -1,7 +1,8 @@
 /**
- * A single-file script to programmatically render a "peak performance" educational video
- * using Remotion.
+ * REMOTION HIGH-PERFORMANCE RENDER SCRIPT
+ * Theme: "History of Ethiopia and the Horn" - Cinematic Documentary Style
  */
+
 const { bundle } = require("@remotion/bundler");
 const { getCompositions, renderMedia } = require("@remotion/renderer");
 const path = require("path");
@@ -12,35 +13,22 @@ const os = require("os");
 const VIDEO_WIDTH = 1920;
 const VIDEO_HEIGHT = 1080;
 const VIDEO_FPS = 30;
-const VIDEO_DURATION_IN_SECONDS = 80; 
-const VIDEO_DURATION_IN_FRAMES = VIDEO_DURATION_IN_SECONDS * VIDEO_FPS;
-const COMPOSITION_ID = "EducationalVideo";
-const AUDIO_URL = "https://raw.githubusercontent.com/GetyeTek/wordwise-images/main/history-of-ethiopia.mp3";
-const OUTPUT_FILE = "output.mp4";
+const COMPOSITION_ID = "HistoryMasterclass";
+const AUDIO_URL = "https://raw.githubusercontent.com/GetyeTek/wordwise-images/main/history-of-ethiopia.mp3"; 
 
-// --- Word/Phrase Timestamps ---
-const SUBTITLES = [
-    { start: 1.1, end: 4.8, text: "History of Ethiopia and the Horn, Unit 1" },
-    { start: 5.2, end: 11.9, text: "Let's make it simple, like a friend talking, without skipping the main points." },
-    { start: 12.5, end: 15.8, text: "History can be confusing with its many names and dates..." },
-    { start: 16.2, end: 18.0, text: "...but if you grasp the CONCEPT, it's easy." },
-    { start: 23.2, end: 25.5, text: "First, what does 'History' mean?" },
-    { start: 26.0, end: 32.0, text: "The word comes from the Greek 'Istoria', meaning INQUIRY, or research." },
-    { start: 34.0, end: 36.0, text: "There is a difference between the PAST and HISTORY." },
-    { start: 37.8, end: 42.8, text: "The PAST is everything that ever happened. All actions, thoughts, events." },
-    { start: 43.0, end: 45.8, text: "But the past is unwritten, unstudied." },
-    { start: 46.0, end: 52.8, text: "HISTORY is the written, analyzed report about the past, created by historians." },
-    { start: 57.5, end: 100.8, text: "History isn't just a list of names and dates." },
-    { start: 101.5, end: 106.0, text: "It's the study of how humans interacted with their environment over time." },
-    { start: 106.8, end: 117.5, text: "While Sociology studies society NOW (a snapshot), History studies CHANGE and CONTINUITY over time." },
-];
+// Generate dynamic filename for artifact matching (video-*.mp4)
+const timestamp = new Date().toISOString().replace(/[:T.]/g, '-').slice(0, 19);
+const OUTPUT_FILE = `video-${timestamp}.mp4`;
 
-// --- The React Components ---
-// Note: Backticks in the code below are escaped (\`) where necessary to avoid breaking the main template string.
+// --- Timings ---
+const TOTAL_DURATION_SEC = 79;
+const TOTAL_FRAMES = TOTAL_DURATION_SEC * VIDEO_FPS;
+
 const reactComponentCode = `
+import React from 'react';
 import {
     registerRoot,
-    Composition, // FIX: Import Composition
+    Composition,
     AbsoluteFill,
     Sequence,
     useCurrentFrame,
@@ -48,203 +36,151 @@ import {
     interpolate,
     spring,
     Audio,
-    staticFile
+    Img,
+    Easing
 } from 'remotion';
-import React from 'react';
 
-// --- Reusable Animated Components ---
-const Title = ({ text, style }) => (
-    <h1 style={{ fontFamily: 'sans-serif', fontSize: '7em', color: 'white', textShadow: '0 0 20px black', textAlign: 'center', ...style }}>{text}</h1>
-);
-const Subtitle = ({ text, style }) => (
-    <p style={{ fontFamily: 'sans-serif', fontSize: '3em', color: '#d4af37', textShadow: '0 0 10px black', textAlign: 'center', ...style }}>{text}</p>
-);
-const Word = ({ children, style }) => <span style={{ display: 'inline-block', ...style }}>{children}</span>;
+// --- Assets & Styles ---
+const IMAGES = {
+    map: "https://images.unsplash.com/photo-1526778548025-fa2f459cd5c1?q=80&w=2000&auto=format&fit=crop",
+    library: "https://images.unsplash.com/photo-1507842217121-e018192c377d?q=80&w=2000&auto=format&fit=crop",
+    greek: "https://images.unsplash.com/photo-1564399580075-5dfe19c205f3?q=80&w=2000&auto=format&fit=crop",
+    fog: "https://images.unsplash.com/photo-1488748366050-65230982df4b?q=80&w=2000&auto=format&fit=crop",
+    writing: "https://images.unsplash.com/photo-1455390582262-044cdead277a?q=80&w=2000&auto=format&fit=crop",
+    farming: "https://images.unsplash.com/photo-1500937386664-56d1dfef3854?q=80&w=2000&auto=format&fit=crop",
+    clock: "https://images.unsplash.com/photo-1508962914676-134849a727f0?q=80&w=2000&auto=format&fit=crop"
+};
 
-const useCurrentSubtitle = () => {
+const COLORS = { gold: "#D4AF37", dark: "#0F0F0F", text: "#FFFFFF", overlay: "rgba(0,0,0,0.6)" };
+const FONT_FAMILY = "sans-serif";
+
+// --- Components ---
+const FilmGrain = () => (
+    <AbsoluteFill style={{ pointerEvents: 'none', opacity: 0.08, backgroundImage: 'url("https://www.transparenttextures.com/patterns/stardust.png")', mixBlendMode: 'overlay' }} />
+);
+
+const KenBurns = ({ src, from = 1, to = 1.15 }) => {
+    const frame = useCurrentFrame();
+    const { durationInFrames } = useVideoConfig();
+    const scale = interpolate(frame, [0, durationInFrames], [from, to]);
+    const opacity = interpolate(frame, [0, 20], [0, 1]);
+    return (
+        <AbsoluteFill style={{ overflow: 'hidden', backgroundColor: COLORS.dark }}>
+            <Img src={src} style={{ width: '100%', height: '100%', objectFit: 'cover', transform: \`scale(\${scale})\`, opacity }} />
+            <AbsoluteFill style={{ backgroundColor: COLORS.overlay }} />
+        </AbsoluteFill>
+    );
+};
+
+const KineticTitle = ({ main, sub }) => {
     const frame = useCurrentFrame();
     const { fps } = useVideoConfig();
-    const currentTime = frame / fps;
-    return SUBTITLES.find(s => currentTime >= s.start && currentTime <= s.end);
+    const enter = spring({ frame, fps, config: { damping: 12 } });
+    const slideUp = interpolate(enter, [0, 1], [50, 0]);
+    return (
+        <AbsoluteFill style={{ justifyContent: 'center', alignItems: 'center', flexDirection: 'column' }}>
+            <h1 style={{ fontFamily: FONT_FAMILY, fontSize: '80px', color: COLORS.text, textTransform: 'uppercase', margin: 0, letterSpacing: '5px', textShadow: '0 10px 30px rgba(0,0,0,0.8)', opacity: enter, transform: \`translateY(\${slideUp}px) scale(\${enter})\` }}>{main}</h1>
+            <div style={{ width: '100px', height: '4px', backgroundColor: COLORS.gold, margin: '20px 0', transform: \`scaleX(\${enter})\` }} />
+            <h2 style={{ fontFamily: FONT_FAMILY, fontSize: '40px', color: COLORS.gold, fontWeight: 300, margin: 0, opacity: interpolate(frame, [10, 30], [0, 1]) }}>{sub}</h2>
+        </AbsoluteFill>
+    );
 };
 
 // --- SCENES ---
-const TitleScene = () => {
+const IntroScene = () => (<AbsoluteFill><KenBurns src={IMAGES.map} /><KineticTitle main="History of Ethiopia" sub="& The Horn: Unit 1" /></AbsoluteFill>);
+const ConceptScene = () => {
     const frame = useCurrentFrame();
-    const opacity = interpolate(frame, [0, 30, 90, 120], [0, 1, 1, 0]);
-    const scale = spring({ frame, fps: 30, from: 0.8, to: 1 });
     return (
-        <AbsoluteFill style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column', transform: \`scale(\${scale})\`, opacity, background: 'linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6))' }}>
-            <Title text="History of Ethiopia & the Horn" />
-            <Subtitle text="Unit 1: An Introduction" />
+        <AbsoluteFill style={{ backgroundColor: COLORS.dark, justifyContent: 'center', alignItems: 'center' }}>
+            <KenBurns src={IMAGES.library} from={1.2} to={1} />
+            <AbsoluteFill style={{ justifyContent: 'center', alignItems: 'center' }}>
+                 <h1 style={{ color: 'white', fontSize: '100px', fontFamily: FONT_FAMILY, textDecoration: 'line-through', opacity: 0.5 }}>DATES</h1>
+                 <h1 style={{ color: COLORS.gold, fontSize: '120px', fontFamily: FONT_FAMILY, marginTop: '-50px', transform: \`scale(\${spring({ frame: frame-15, fps: 30 })})\` }}>CONCEPTS</h1>
+            </AbsoluteFill>
         </AbsoluteFill>
     );
 };
-const GreekScene = () => {
+const EtymologyScene = () => (<AbsoluteFill><KenBurns src={IMAGES.greek} /><AbsoluteFill style={{ justifyContent: 'center', alignItems: 'center', flexDirection: 'column' }}><h1 style={{ fontSize: '150px', color: 'white', fontFamily: 'serif' }}>ΙΣΤΟΡΙΑ</h1><h2 style={{ fontSize: '60px', color: COLORS.gold, fontFamily: FONT_FAMILY, letterSpacing: '10px' }}>INQUIRY</h2></AbsoluteFill></AbsoluteFill>);
+const SplitScreenScene = () => {
     const frame = useCurrentFrame();
-    const word = "ΙΣΤΟΡΙΑ";
+    const slideLeft = spring({ frame, fps: 30, from: -100, to: 0 });
+    const slideRight = spring({ frame, fps: 30, from: 100, to: 0 });
     return (
-        <AbsoluteFill style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column', backgroundColor: '#111' }}>
-            <h2 style={{ fontFamily: 'serif', fontSize: '12em', color: 'white' }}>
-                {word.split('').map((char, i) => (
-                    <Word key={i} style={{ transform: \`scale(\${spring({ frame: frame - i * 5, fps: 30 })})\` }}>{char}</Word>
-                ))}
-            </h2>
-            <Subtitle text="INQUIRY" style={{ opacity: interpolate(frame, [80, 100], [0, 1]) }} />
+        <AbsoluteFill style={{ flexDirection: 'row' }}>
+            <div style={{ flex: 1, position: 'relative', overflow: 'hidden', transform: \`translateX(\${slideLeft}%)\` }}><Img src={IMAGES.fog} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /><div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.4)', display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column' }}><h2 style={{ color: '#aaa', fontSize: '60px', fontFamily: FONT_FAMILY }}>THE PAST</h2><p style={{ color: 'white', fontSize: '30px' }}>Infinite. Unwritten.</p></div></div>
+            <div style={{ width: '5px', backgroundColor: COLORS.gold, zIndex: 10 }} />
+            <div style={{ flex: 1, position: 'relative', overflow: 'hidden', transform: \`translateX(\${slideRight}%)\` }}><Img src={IMAGES.writing} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /><div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.7)', display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column' }}><h2 style={{ color: COLORS.gold, fontSize: '60px', fontFamily: FONT_FAMILY }}>HISTORY</h2><p style={{ color: 'white', fontSize: '30px' }}>Analyzed. Written.</p></div></div>
         </AbsoluteFill>
     );
-}
-const PastVsHistoryScene = () => {
-    const frame = useCurrentFrame();
-    const slideIn = interpolate(frame, [0, 30], [-100, 0], { extrapolateRight: 'clamp' });
-    return (
-        <AbsoluteFill style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center', backgroundColor: '#1a1a1a', padding: '50px', transform: \`translateX(\${slideIn}%)\` }}>
-            <div style={{ flex: 1, textAlign: 'center', border: '5px dashed #555', padding: 20, borderRadius: 15 }}>
-                <Title text="🌫️ The PAST" style={{ fontSize: '4em' }}/>
-                <Subtitle text="Everything that happened. Unorganized." style={{ fontSize: '2em' }}/>
-            </div>
-            <div style={{ fontSize: '8em', color: '#d4af37', margin: '0 40px' }}>➡️</div>
-            <div style={{ flex: 1, textAlign: 'center', border: '5px solid #d4af37', padding: 20, borderRadius: 15 }}>
-                <Title text="✍️ HISTORY" style={{ fontSize: '4em' }}/>
-                <Subtitle text="The organized study of the past." style={{ fontSize: '2em' }}/>
-            </div>
-        </AbsoluteFill>
-    );
-}
+};
+const HumanEnvScene = () => (<AbsoluteFill><KenBurns src={IMAGES.farming} /><KineticTitle main="Human & Nature" sub="Interaction" /></AbsoluteFill>);
 const ChangeScene = () => {
     const frame = useCurrentFrame();
-    const { fps } = useVideoConfig();
-    const dotPosition = interpolate(frame, [0, 10 * fps], [0, 100], { extrapolateRight: 'clamp' });
-    return(
-         <AbsoluteFill style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column', backgroundColor: '#111' }}>
-            <Subtitle text="History is the study of..." />
-            <Title text="CHANGE over TIME" />
-            <div style={{ width: '70%', height: '10px', background: '#555', marginTop: 50, borderRadius: 5 }}>
-                <div style={{ width: '40px', height: '40px', background: '#d4af37', borderRadius: '50%', position: 'relative', left: \`\${dotPosition}%\`, transform: 'translate(-50%, -15px)' }}/>
-            </div>
-         </AbsoluteFill>
-    );
-}
-
-// Main component logic
-const VideoComponent = () => {
-    const currentSubtitle = useCurrentSubtitle();
+    const width = interpolate(frame, [0, 60], [0, 80], { extrapolateRight: 'clamp', easing: Easing.bezier(0.25, 1, 0.5, 1) });
     return (
-        <AbsoluteFill style={{ backgroundColor: '#1a1a1a' }}>
-            <Audio src={staticFile('audio.mp3')} />
-            
-            <Sequence from={0} durationInFrames={12 * VIDEO_FPS}><TitleScene /></Sequence>
-            <Sequence from={25 * VIDEO_FPS} durationInFrames={10 * VIDEO_FPS}><GreekScene /></Sequence>
-            <Sequence from={36 * VIDEO_FPS} durationInFrames={21 * VIDEO_FPS}><PastVsHistoryScene /></Sequence>
-            <Sequence from={57 * VIDEO_FPS}><ChangeScene /></Sequence>
-
-            <AbsoluteFill style={{ justifyContent: 'flex-end', alignItems: 'center', paddingBottom: '50px' }}>
-                {currentSubtitle && (
-                    <div style={{ backgroundColor: 'rgba(0,0,0,0.7)', padding: '10px 20px', borderRadius: 10 }}>
-                        <Subtitle text={currentSubtitle.text} style={{ fontSize: '2.5em', margin: 0 }} />
-                    </div>
-                )}
+        <AbsoluteFill style={{ backgroundColor: '#111', justifyContent: 'center', alignItems: 'center' }}>
+            <KenBurns src={IMAGES.clock} from={1} to={1.1} />
+            <AbsoluteFill style={{ justifyContent: 'center', alignItems: 'center', flexDirection: 'column' }}>
+                 <h1 style={{ color: 'white', fontSize: '80px', fontFamily: FONT_FAMILY }}>CHANGE & CONTINUITY</h1>
+                 <div style={{ width: '60%', height: '10px', backgroundColor: '#333', marginTop: '50px', borderRadius: '5px', overflow: 'hidden' }}><div style={{ width: \`\${width}%\`, height: '100%', backgroundColor: COLORS.gold }} /></div>
             </AbsoluteFill>
         </AbsoluteFill>
     );
 };
 
-// FIX: Wrap in Composition so getCompositions finds it
-export const RemotionRoot = () => {
+// --- MAIN COMPOSITION ---
+const VideoComponent = () => {
     return (
-        <Composition
-            id="${COMPOSITION_ID}"
-            component={VideoComponent}
-            durationInFrames={${VIDEO_DURATION_IN_FRAMES}}
-            fps={${VIDEO_FPS}}
-            width={${VIDEO_WIDTH}}
-            height={${VIDEO_HEIGHT}}
-        />
+        <AbsoluteFill style={{ backgroundColor: 'black' }}>
+            <Audio src="${AUDIO_URL}" />
+            <Sequence from={0} durationInFrames={180}><IntroScene /></Sequence>
+            <Sequence from={180} durationInFrames={420}><ConceptScene /></Sequence>
+            <Sequence from={600} durationInFrames={390}><EtymologyScene /></Sequence>
+            <Sequence from={990} durationInFrames={720}><SplitScreenScene /></Sequence>
+            <Sequence from={1710} durationInFrames={300}><HumanEnvScene /></Sequence>
+             <Sequence from={2010} durationInFrames={360}><ChangeScene /></Sequence>
+            <FilmGrain />
+            <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100px', backgroundColor: 'black', zIndex: 100 }} />
+            <div style={{ position: 'absolute', bottom: 0, left: 0, width: '100%', height: '100px', backgroundColor: 'black', zIndex: 100 }} />
+        </AbsoluteFill>
     );
 };
 
+export const RemotionRoot = () => (
+    <Composition id="${COMPOSITION_ID}" component={VideoComponent} durationInFrames={${TOTAL_FRAMES}} fps={${VIDEO_FPS}} width={${VIDEO_WIDTH}} height={${VIDEO_HEIGHT}} />
+);
 registerRoot(RemotionRoot);
 `;
 
-/**
- * Main rendering function.
- */
 const performRender = async () => {
-    console.log("Starting video render process...");
-
-    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'remotion-'));
-    console.log(`Created temporary directory: ${tempDir}`);
-
-    // FIX: Using .tsx extension so Bundler handles JSX
+    console.log("🎬 Starting Cinematic Video Render...");
+    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'remotion-peak-'));
     const entryPoint = path.join(tempDir, "index.tsx");
-    
-    // FIX: Inject constants into the generated file so the React code can use 'VIDEO_FPS'
-    const constantsData = `
-        export const SUBTITLES = ${JSON.stringify(SUBTITLES, null, 2)};
-        const VIDEO_FPS = ${VIDEO_FPS}; 
-    `;
-    
-    await fs.writeFile(entryPoint, `${constantsData}\n${reactComponentCode}`);
-
-    const publicDir = path.join(tempDir, 'public');
-    await fs.mkdir(publicDir);
-
-    console.log(`Downloading audio from ${AUDIO_URL}...`);
-    const audioFilePath = path.join(publicDir, 'audio.mp3');
-    await downloadFile(AUDIO_URL, audioFilePath);
-    console.log("Audio downloaded successfully.");
+    await fs.writeFile(entryPoint, reactComponentCode);
 
     try {
-        console.log("Bundling Remotion project...");
-        const bundleLocation = await bundle({
-            entryPoint,
-            outDir: tempDir,
-            webpackOverride: (config) => config,
-        });
-
-        console.log("Getting compositions...");
-        const comps = await getCompositions(bundleLocation, {
-            serveAssetsFrom: publicDir
-        });
-        
+        console.log("📦 Bundling project...");
+        const bundleLocation = await bundle({ entryPoint, outDir: tempDir, webpackOverride: (c) => c });
+        const comps = await getCompositions(bundleLocation);
         const video = comps.find((c) => c.id === COMPOSITION_ID);
-        if (!video) {
-            throw new Error(`Composition "${COMPOSITION_ID}" not found. Found: ${comps.map(c => c.id).join(", ")}`);
-        }
+        if (!video) throw new Error(\`Composition not found\`);
 
-        console.log("Rendering video... This may take a few minutes.");
+        console.log(\`🚀 Rendering to \${OUTPUT_FILE}...\`);
         await renderMedia({
             composition: video,
             serveUrl: bundleLocation,
             codec: "h264",
             outputLocation: OUTPUT_FILE,
-            inputProps: {},
-            logLevel: 'verbose',
+            crf: 20,
+            pixelFormat: 'yuv420p',
+            concurrency: os.cpus().length,
         });
-        console.log(`Render complete! Video saved to ${OUTPUT_FILE}`);
-
+        console.log(\`✅ SUCCESS! Video saved: \${OUTPUT_FILE}\`);
+    } catch (err) {
+        console.error("❌ Render Failed:", err);
+        process.exit(1);
     } finally {
         await fs.rm(tempDir, { recursive: true, force: true });
-        console.log("Cleaned up temporary files.");
     }
 };
-
-const downloadFile = async (url, dest) => {
-    try {
-        const response = await fetch(url);
-        if (!response.ok) {
-            throw new Error(`Server responded with ${response.status}: ${response.statusText}`);
-        }
-        const arrayBuffer = await response.arrayBuffer();
-        const buffer = Buffer.from(arrayBuffer);
-        await fs.writeFile(dest, buffer);
-    } catch (error) {
-        throw new Error(`Failed to download file: ${error.message}`);
-    }
-};
-
-// Execute the render
-performRender().catch((err) => {
-    console.error("Error during rendering:", err);
-    process.exit(1);
-});
+performRender();
