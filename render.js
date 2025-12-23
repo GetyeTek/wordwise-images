@@ -41,14 +41,15 @@ import {
 } from 'remotion';
 
 // --- Assets & Styles ---
+// UPDATED: Fresh, stable image URLs
 const IMAGES = {
-    map: "https://images.unsplash.com/photo-1526778548025-fa2f459cd5c1?q=80&w=2000&auto=format&fit=crop",
-    library: "https://images.unsplash.com/photo-1507842217121-e018192c377d?q=80&w=2000&auto=format&fit=crop",
-    greek: "https://images.unsplash.com/photo-1564399580075-5dfe19c205f3?q=80&w=2000&auto=format&fit=crop",
-    fog: "https://images.unsplash.com/photo-1488748366050-65230982df4b?q=80&w=2000&auto=format&fit=crop",
-    writing: "https://images.unsplash.com/photo-1455390582262-044cdead277a?q=80&w=2000&auto=format&fit=crop",
-    farming: "https://images.unsplash.com/photo-1500937386664-56d1dfef3854?q=80&w=2000&auto=format&fit=crop",
-    clock: "https://images.unsplash.com/photo-1508962914676-134849a727f0?q=80&w=2000&auto=format&fit=crop"
+    map: "https://images.unsplash.com/photo-1524661135-423995f22d0b?q=80&w=1920&auto=format&fit=crop",
+    library: "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?q=80&w=1920&auto=format&fit=crop",
+    greek: "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?q=80&w=1920&auto=format&fit=crop",
+    fog: "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?q=80&w=1920&auto=format&fit=crop",
+    writing: "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?q=80&w=1920&auto=format&fit=crop",
+    farming: "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?q=80&w=1920&auto=format&fit=crop",
+    clock: "https://images.unsplash.com/photo-1495364141860-b0d03eccd065?q=80&w=1920&auto=format&fit=crop"
 };
 
 const COLORS = { gold: "#D4AF37", dark: "#0F0F0F", text: "#FFFFFF", overlay: "rgba(0,0,0,0.6)" };
@@ -158,10 +159,10 @@ const performRender = async () => {
     const entryPoint = path.join(tempDir, "index.tsx");
     await fs.writeFile(entryPoint, reactComponentCode);
 
-    // FIX: Add flags to prevent 'Target closed' error in CI/GitHub Actions
+    // BROWSER CONFIG for GITHUB ACTIONS
     const browserOptions = {
         headless: true,
-        gl: 'swangle', // Software graphics (no GPU)
+        gl: 'swangle',
         args: [
             '--no-sandbox',
             '--disable-setuid-sandbox'
@@ -172,8 +173,7 @@ const performRender = async () => {
         console.log("📦 Bundling project...");
         const bundleLocation = await bundle({ entryPoint, outDir: tempDir, webpackOverride: (c) => c });
         
-        console.log("🎥 Identifying Composition (Scanning)...");
-        // FIX: Pass browserOptions here
+        console.log("🎥 Identifying Composition...");
         const comps = await getCompositions(bundleLocation, {
             chromiumOptions: browserOptions
         });
@@ -183,7 +183,6 @@ const performRender = async () => {
 
         console.log(`🚀 Rendering to ${OUTPUT_FILE}...`);
         
-        // FIX: Pass browserOptions here as well
         await renderMedia({
             composition: video,
             serveUrl: bundleLocation,
@@ -192,7 +191,8 @@ const performRender = async () => {
             crf: 20,
             pixelFormat: 'yuv420p',
             concurrency: os.cpus().length,
-            chromiumOptions: browserOptions
+            chromiumOptions: browserOptions,
+            logLevel: 'info'
         });
         
         console.log(`✅ SUCCESS! Video saved: ${OUTPUT_FILE}`);
