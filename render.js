@@ -16,7 +16,7 @@ const VIDEO_FPS = 30;
 const COMPOSITION_ID = "HistoryMasterclass";
 const AUDIO_URL = "https://raw.githubusercontent.com/GetyeTek/wordwise-images/main/history-of-ethiopia.mp3"; 
 
-// Generate dynamic filename for artifact matching (video-*.mp4)
+// Generate dynamic filename
 const timestamp = new Date().toISOString().replace(/[:T.]/g, '-').slice(0, 19);
 const OUTPUT_FILE = `video-${timestamp}.mp4`;
 
@@ -24,6 +24,7 @@ const OUTPUT_FILE = `video-${timestamp}.mp4`;
 const TOTAL_DURATION_SEC = 79;
 const TOTAL_FRAMES = TOTAL_DURATION_SEC * VIDEO_FPS;
 
+// NOTE: Backticks inside this string ARE escaped (\`) because this is code being written to a file.
 const reactComponentCode = `
 import React from 'react';
 import {
@@ -163,9 +164,12 @@ const performRender = async () => {
         const bundleLocation = await bundle({ entryPoint, outDir: tempDir, webpackOverride: (c) => c });
         const comps = await getCompositions(bundleLocation);
         const video = comps.find((c) => c.id === COMPOSITION_ID);
-        if (!video) throw new Error(\`Composition not found\`);
+        
+        // FIX: Removed invalid backslashes here
+        if (!video) throw new Error("Composition not found");
 
-        console.log(\`🚀 Rendering to \${OUTPUT_FILE}...\`);
+        console.log(`🚀 Rendering to ${OUTPUT_FILE}...`);
+        
         await renderMedia({
             composition: video,
             serveUrl: bundleLocation,
@@ -175,7 +179,9 @@ const performRender = async () => {
             pixelFormat: 'yuv420p',
             concurrency: os.cpus().length,
         });
-        console.log(\`✅ SUCCESS! Video saved: \${OUTPUT_FILE}\`);
+        
+        // FIX: Removed invalid backslashes here
+        console.log(`✅ SUCCESS! Video saved: ${OUTPUT_FILE}`);
     } catch (err) {
         console.error("❌ Render Failed:", err);
         process.exit(1);
