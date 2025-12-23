@@ -1,6 +1,6 @@
 /**
- * REMOTION OPTIMIZED RENDER SCRIPT
- * Optimized for GitHub Actions Free Tier (720p, Single Thread)
+ * REMOTION FINAL TEST SCRIPT
+ * Uses Single Working Asset for All Scenes
  */
 
 const { bundle } = require("@remotion/bundler");
@@ -10,52 +10,38 @@ const fs = require("fs/promises");
 const os = require("os");
 
 // --- Configuration ---
-// REDUCED TO 720p TO PREVENT CRASHES
-const VIDEO_WIDTH = 1280;
+const VIDEO_WIDTH = 1280; // 720p for stability
 const VIDEO_HEIGHT = 720;
 const VIDEO_FPS = 30;
 const COMPOSITION_ID = "HistoryMasterclass";
 const AUDIO_URL = "https://raw.githubusercontent.com/GetyeTek/wordwise-images/main/history-of-ethiopia.mp3"; 
 
-// Generate dynamic filename
 const timestamp = new Date().toISOString().replace(/[:T.]/g, '-').slice(0, 19);
 const OUTPUT_FILE = `video-${timestamp}.mp4`;
 
-// --- Timings ---
-const TOTAL_DURATION_SEC = 79;
-const TOTAL_FRAMES = TOTAL_DURATION_SEC * VIDEO_FPS;
+const TOTAL_FRAMES = 79 * VIDEO_FPS; // 79 seconds
 
 const reactComponentCode = `
 import React from 'react';
-import {
-    registerRoot,
-    Composition,
-    AbsoluteFill,
-    Sequence,
-    useCurrentFrame,
-    useVideoConfig,
-    interpolate,
-    spring,
-    Audio,
-    Img,
-    Easing
-} from 'remotion';
+import { registerRoot, Composition, AbsoluteFill, Sequence, useCurrentFrame, useVideoConfig, interpolate, spring, Audio, Img, Easing } from 'remotion';
 
 // --- Assets ---
+// The specific working URL you requested, applied to ALL slots.
+const WORKING_IMAGE = "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?q=80&w=1280&auto=format&fit=crop";
+
 const IMAGES = {
-    map: "https://images.unsplash.com/photo-1524661135-423995f22d0b?q=80&w=1280&auto=format&fit=crop",
-    library: "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?q=80&w=1280&auto=format&fit=crop",
-    greek: "https://images.unsplash.com/photo-1564399580075-5dfe19c205f3?q=80&w=1280&auto=format&fit=crop",
-    fog: "https://images.unsplash.com/photo-1485230905346-71acb9518d9c?q=80&w=1280&auto=format&fit=crop",
-    writing: "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?q=80&w=1280&auto=format&fit=crop",
-    farming: "https://images.unsplash.com/photo-1625246333195-08f9942b35f4?q=80&w=1280&auto=format&fit=crop",
-    clock: "https://images.unsplash.com/photo-1495364141860-b0d03eccd065?q=80&w=1280&auto=format&fit=crop"
+    map: WORKING_IMAGE,
+    library: WORKING_IMAGE,
+    greek: WORKING_IMAGE,
+    fog: WORKING_IMAGE,
+    writing: WORKING_IMAGE,
+    farming: WORKING_IMAGE,
+    clock: WORKING_IMAGE
 };
 
 const COLORS = { gold: "#D4AF37", dark: "#0F0F0F", text: "#FFFFFF", overlay: "rgba(0,0,0,0.6)" };
 const FONT_FAMILY = "sans-serif";
 
-// --- Components ---
 const KenBurns = ({ src, from = 1, to = 1.15 }) => {
     const frame = useCurrentFrame();
     const { durationInFrames } = useVideoConfig();
@@ -125,7 +111,6 @@ const ChangeScene = () => {
     );
 };
 
-// --- MAIN COMPOSITION ---
 const VideoComponent = () => {
     return (
         <AbsoluteFill style={{ backgroundColor: 'black' }}>
@@ -149,15 +134,22 @@ registerRoot(RemotionRoot);
 `;
 
 const performRender = async () => {
-    console.log("🎬 Starting OPTIMIZED (720p) Video Render...");
+    console.log("🎬 Starting STABLE Video Render (Using 1 Known Image)...");
     const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'remotion-peak-'));
     const entryPoint = path.join(tempDir, "index.tsx");
     await fs.writeFile(entryPoint, reactComponentCode);
 
+    // Flags to silence GPU warnings and ensure memory stability
     const browserOptions = {
         headless: true,
-        gl: 'swangle',
-        args: ['--no-sandbox', '--disable-setuid-sandbox']
+        gl: 'swangle', // Force CPU rendering
+        args: [
+            '--no-sandbox',
+            '--disable-setuid-sandbox',
+            '--disable-dev-shm-usage', // PREVENTS CRASHES IN CI
+            '--disable-gpu',           // SILENCES "NO DRIVER" WARNINGS
+            '--disable-software-rasterizer',
+        ]
     };
 
     try {
@@ -169,18 +161,18 @@ const performRender = async () => {
         const video = comps.find((c) => c.id === COMPOSITION_ID);
         if (!video) throw new Error("Composition not found");
 
-        console.log(`🚀 Rendering to ${OUTPUT_FILE} (720p, Single Thread)...`);
+        console.log(`🚀 Rendering to ${OUTPUT_FILE}...`);
         
         await renderMedia({
             composition: video,
             serveUrl: bundleLocation,
             codec: "h264",
             outputLocation: OUTPUT_FILE,
-            crf: 23, // Slightly higher CRF for faster encode
+            crf: 24, // Balanced quality/speed
             pixelFormat: 'yuv420p',
-            concurrency: 1, // FORCE SINGLE THREAD TO SAVE RAM
+            concurrency: 1, // STABILITY MODE
             chromiumOptions: browserOptions,
-            logLevel: 'verbose' // Show progress bar in logs
+            logLevel: 'verbose' // Show progress bar
         });
         
         console.log(`✅ SUCCESS! Video saved: ${OUTPUT_FILE}`);
