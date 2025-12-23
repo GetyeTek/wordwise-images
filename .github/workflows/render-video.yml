@@ -1,35 +1,32 @@
-name: Generate Educational Video
-
-on:
-  workflow_dispatch:
+name: Render Video
+on: [push, workflow_dispatch]
 
 jobs:
-  render_video:
+  render:
     runs-on: ubuntu-latest
     steps:
-      - name: Check out repository
-        uses: actions/checkout@v4
-
-      - name: Set up Node.js
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
-
-      # This step is the one we are fixing
-      - name: Install system dependencies
-        run: |
-          sudo apt-get update
-          # Replace libasound2 with libasound2t64
-          sudo apt-get install -y libgbm-dev libasound2t64
-
-      - name: Install Node.js dependencies
+          node-version: 18
+      
+      - name: Install Dependencies
+        # This installs the software on GitHub's computer
         run: npm install
 
-      - name: Run the Remotion rendering script
-        run: npm run render
+      - name: Install FFmpeg
+        # Ensures video processing tools are present
+        uses: FedericoCarboni/setup-ffmpeg@v2
 
-      - name: Upload video artifact
+      - name: Render Video
+        # This runs the script
+        run: node render.js
+
+      - name: Upload Video Artifact
+        # This takes the result and gives it to you
         uses: actions/upload-artifact@v4
         with:
-          name: video-artifact
-          path: output.mp4
+          name: my-cinematic-video
+          path: video-*.mp4
