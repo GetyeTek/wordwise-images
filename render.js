@@ -1,6 +1,6 @@
 /**
- * REMOTION HIGH-PERFORMANCE RENDER SCRIPT
- * Theme: "History of Ethiopia and the Horn" - Cinematic Documentary Style
+ * REMOTION OPTIMIZED RENDER SCRIPT
+ * Optimized for GitHub Actions Free Tier (720p, Single Thread)
  */
 
 const { bundle } = require("@remotion/bundler");
@@ -10,8 +10,9 @@ const fs = require("fs/promises");
 const os = require("os");
 
 // --- Configuration ---
-const VIDEO_WIDTH = 1920;
-const VIDEO_HEIGHT = 1080;
+// REDUCED TO 720p TO PREVENT CRASHES
+const VIDEO_WIDTH = 1280;
+const VIDEO_HEIGHT = 720;
 const VIDEO_FPS = 30;
 const COMPOSITION_ID = "HistoryMasterclass";
 const AUDIO_URL = "https://raw.githubusercontent.com/GetyeTek/wordwise-images/main/history-of-ethiopia.mp3"; 
@@ -40,26 +41,21 @@ import {
     Easing
 } from 'remotion';
 
-// --- Assets & Styles ---
-// UPDATED: Fresh, stable image URLs
+// --- Assets ---
 const IMAGES = {
-    map: "https://images.unsplash.com/photo-1524661135-423995f22d0b?q=80&w=1920&auto=format&fit=crop",
-    library: "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?q=80&w=1920&auto=format&fit=crop",
-    greek: "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?q=80&w=1920&auto=format&fit=crop",
-    fog: "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?q=80&w=1920&auto=format&fit=crop",
-    writing: "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?q=80&w=1920&auto=format&fit=crop",
-    farming: "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?q=80&w=1920&auto=format&fit=crop",
-    clock: "https://images.unsplash.com/photo-1495364141860-b0d03eccd065?q=80&w=1920&auto=format&fit=crop"
+    map: "https://images.unsplash.com/photo-1524661135-423995f22d0b?q=80&w=1280&auto=format&fit=crop",
+    library: "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?q=80&w=1280&auto=format&fit=crop",
+    greek: "https://images.unsplash.com/photo-1564399580075-5dfe19c205f3?q=80&w=1280&auto=format&fit=crop",
+    fog: "https://images.unsplash.com/photo-1485230905346-71acb9518d9c?q=80&w=1280&auto=format&fit=crop",
+    writing: "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?q=80&w=1280&auto=format&fit=crop",
+    farming: "https://images.unsplash.com/photo-1625246333195-08f9942b35f4?q=80&w=1280&auto=format&fit=crop",
+    clock: "https://images.unsplash.com/photo-1495364141860-b0d03eccd065?q=80&w=1280&auto=format&fit=crop"
 };
 
 const COLORS = { gold: "#D4AF37", dark: "#0F0F0F", text: "#FFFFFF", overlay: "rgba(0,0,0,0.6)" };
 const FONT_FAMILY = "sans-serif";
 
 // --- Components ---
-const FilmGrain = () => (
-    <AbsoluteFill style={{ pointerEvents: 'none', opacity: 0.08, backgroundImage: 'url("https://www.transparenttextures.com/patterns/stardust.png")', mixBlendMode: 'overlay' }} />
-);
-
 const KenBurns = ({ src, from = 1, to = 1.15 }) => {
     const frame = useCurrentFrame();
     const { durationInFrames } = useVideoConfig();
@@ -80,9 +76,9 @@ const KineticTitle = ({ main, sub }) => {
     const slideUp = interpolate(enter, [0, 1], [50, 0]);
     return (
         <AbsoluteFill style={{ justifyContent: 'center', alignItems: 'center', flexDirection: 'column' }}>
-            <h1 style={{ fontFamily: FONT_FAMILY, fontSize: '80px', color: COLORS.text, textTransform: 'uppercase', margin: 0, letterSpacing: '5px', textShadow: '0 10px 30px rgba(0,0,0,0.8)', opacity: enter, transform: \`translateY(\${slideUp}px) scale(\${enter})\` }}>{main}</h1>
+            <h1 style={{ fontFamily: FONT_FAMILY, fontSize: '60px', color: COLORS.text, textTransform: 'uppercase', margin: 0, letterSpacing: '5px', textShadow: '0 10px 30px rgba(0,0,0,0.8)', opacity: enter, transform: \`translateY(\${slideUp}px) scale(\${enter})\` }}>{main}</h1>
             <div style={{ width: '100px', height: '4px', backgroundColor: COLORS.gold, margin: '20px 0', transform: \`scaleX(\${enter})\` }} />
-            <h2 style={{ fontFamily: FONT_FAMILY, fontSize: '40px', color: COLORS.gold, fontWeight: 300, margin: 0, opacity: interpolate(frame, [10, 30], [0, 1]) }}>{sub}</h2>
+            <h2 style={{ fontFamily: FONT_FAMILY, fontSize: '30px', color: COLORS.gold, fontWeight: 300, margin: 0, opacity: interpolate(frame, [10, 30], [0, 1]) }}>{sub}</h2>
         </AbsoluteFill>
     );
 };
@@ -95,22 +91,22 @@ const ConceptScene = () => {
         <AbsoluteFill style={{ backgroundColor: COLORS.dark, justifyContent: 'center', alignItems: 'center' }}>
             <KenBurns src={IMAGES.library} from={1.2} to={1} />
             <AbsoluteFill style={{ justifyContent: 'center', alignItems: 'center' }}>
-                 <h1 style={{ color: 'white', fontSize: '100px', fontFamily: FONT_FAMILY, textDecoration: 'line-through', opacity: 0.5 }}>DATES</h1>
-                 <h1 style={{ color: COLORS.gold, fontSize: '120px', fontFamily: FONT_FAMILY, marginTop: '-50px', transform: \`scale(\${spring({ frame: frame-15, fps: 30 })})\` }}>CONCEPTS</h1>
+                 <h1 style={{ color: 'white', fontSize: '80px', fontFamily: FONT_FAMILY, textDecoration: 'line-through', opacity: 0.5 }}>DATES</h1>
+                 <h1 style={{ color: COLORS.gold, fontSize: '100px', fontFamily: FONT_FAMILY, marginTop: '-40px', transform: \`scale(\${spring({ frame: frame-15, fps: 30 })})\` }}>CONCEPTS</h1>
             </AbsoluteFill>
         </AbsoluteFill>
     );
 };
-const EtymologyScene = () => (<AbsoluteFill><KenBurns src={IMAGES.greek} /><AbsoluteFill style={{ justifyContent: 'center', alignItems: 'center', flexDirection: 'column' }}><h1 style={{ fontSize: '150px', color: 'white', fontFamily: 'serif' }}>ΙΣΤΟΡΙΑ</h1><h2 style={{ fontSize: '60px', color: COLORS.gold, fontFamily: FONT_FAMILY, letterSpacing: '10px' }}>INQUIRY</h2></AbsoluteFill></AbsoluteFill>);
+const EtymologyScene = () => (<AbsoluteFill><KenBurns src={IMAGES.greek} /><AbsoluteFill style={{ justifyContent: 'center', alignItems: 'center', flexDirection: 'column' }}><h1 style={{ fontSize: '120px', color: 'white', fontFamily: 'serif' }}>ΙΣΤΟΡΙΑ</h1><h2 style={{ fontSize: '50px', color: COLORS.gold, fontFamily: FONT_FAMILY, letterSpacing: '10px' }}>INQUIRY</h2></AbsoluteFill></AbsoluteFill>);
 const SplitScreenScene = () => {
     const frame = useCurrentFrame();
     const slideLeft = spring({ frame, fps: 30, from: -100, to: 0 });
     const slideRight = spring({ frame, fps: 30, from: 100, to: 0 });
     return (
         <AbsoluteFill style={{ flexDirection: 'row' }}>
-            <div style={{ flex: 1, position: 'relative', overflow: 'hidden', transform: \`translateX(\${slideLeft}%)\` }}><Img src={IMAGES.fog} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /><div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.4)', display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column' }}><h2 style={{ color: '#aaa', fontSize: '60px', fontFamily: FONT_FAMILY }}>THE PAST</h2><p style={{ color: 'white', fontSize: '30px' }}>Infinite. Unwritten.</p></div></div>
-            <div style={{ width: '5px', backgroundColor: COLORS.gold, zIndex: 10 }} />
-            <div style={{ flex: 1, position: 'relative', overflow: 'hidden', transform: \`translateX(\${slideRight}%)\` }}><Img src={IMAGES.writing} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /><div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.7)', display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column' }}><h2 style={{ color: COLORS.gold, fontSize: '60px', fontFamily: FONT_FAMILY }}>HISTORY</h2><p style={{ color: 'white', fontSize: '30px' }}>Analyzed. Written.</p></div></div>
+            <div style={{ flex: 1, position: 'relative', overflow: 'hidden', transform: \`translateX(\${slideLeft}%)\` }}><Img src={IMAGES.fog} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /><div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.4)', display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column' }}><h2 style={{ color: '#aaa', fontSize: '40px', fontFamily: FONT_FAMILY }}>THE PAST</h2><p style={{ color: 'white', fontSize: '24px' }}>Infinite. Unwritten.</p></div></div>
+            <div style={{ width: '4px', backgroundColor: COLORS.gold, zIndex: 10 }} />
+            <div style={{ flex: 1, position: 'relative', overflow: 'hidden', transform: \`translateX(\${slideRight}%)\` }}><Img src={IMAGES.writing} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /><div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.7)', display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column' }}><h2 style={{ color: COLORS.gold, fontSize: '40px', fontFamily: FONT_FAMILY }}>HISTORY</h2><p style={{ color: 'white', fontSize: '24px' }}>Analyzed. Written.</p></div></div>
         </AbsoluteFill>
     );
 };
@@ -122,8 +118,8 @@ const ChangeScene = () => {
         <AbsoluteFill style={{ backgroundColor: '#111', justifyContent: 'center', alignItems: 'center' }}>
             <KenBurns src={IMAGES.clock} from={1} to={1.1} />
             <AbsoluteFill style={{ justifyContent: 'center', alignItems: 'center', flexDirection: 'column' }}>
-                 <h1 style={{ color: 'white', fontSize: '80px', fontFamily: FONT_FAMILY }}>CHANGE & CONTINUITY</h1>
-                 <div style={{ width: '60%', height: '10px', backgroundColor: '#333', marginTop: '50px', borderRadius: '5px', overflow: 'hidden' }}><div style={{ width: \`\${width}%\`, height: '100%', backgroundColor: COLORS.gold }} /></div>
+                 <h1 style={{ color: 'white', fontSize: '60px', fontFamily: FONT_FAMILY }}>CHANGE & CONTINUITY</h1>
+                 <div style={{ width: '60%', height: '8px', backgroundColor: '#333', marginTop: '40px', borderRadius: '4px', overflow: 'hidden' }}><div style={{ width: \`\${width}%\`, height: '100%', backgroundColor: COLORS.gold }} /></div>
             </AbsoluteFill>
         </AbsoluteFill>
     );
@@ -140,9 +136,8 @@ const VideoComponent = () => {
             <Sequence from={990} durationInFrames={720}><SplitScreenScene /></Sequence>
             <Sequence from={1710} durationInFrames={300}><HumanEnvScene /></Sequence>
              <Sequence from={2010} durationInFrames={360}><ChangeScene /></Sequence>
-            <FilmGrain />
-            <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100px', backgroundColor: 'black', zIndex: 100 }} />
-            <div style={{ position: 'absolute', bottom: 0, left: 0, width: '100%', height: '100px', backgroundColor: 'black', zIndex: 100 }} />
+            <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '80px', backgroundColor: 'black', zIndex: 100 }} />
+            <div style={{ position: 'absolute', bottom: 0, left: 0, width: '100%', height: '80px', backgroundColor: 'black', zIndex: 100 }} />
         </AbsoluteFill>
     );
 };
@@ -154,19 +149,15 @@ registerRoot(RemotionRoot);
 `;
 
 const performRender = async () => {
-    console.log("🎬 Starting Cinematic Video Render...");
+    console.log("🎬 Starting OPTIMIZED (720p) Video Render...");
     const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'remotion-peak-'));
     const entryPoint = path.join(tempDir, "index.tsx");
     await fs.writeFile(entryPoint, reactComponentCode);
 
-    // BROWSER CONFIG for GITHUB ACTIONS
     const browserOptions = {
         headless: true,
         gl: 'swangle',
-        args: [
-            '--no-sandbox',
-            '--disable-setuid-sandbox'
-        ]
+        args: ['--no-sandbox', '--disable-setuid-sandbox']
     };
 
     try {
@@ -174,25 +165,22 @@ const performRender = async () => {
         const bundleLocation = await bundle({ entryPoint, outDir: tempDir, webpackOverride: (c) => c });
         
         console.log("🎥 Identifying Composition...");
-        const comps = await getCompositions(bundleLocation, {
-            chromiumOptions: browserOptions
-        });
-
+        const comps = await getCompositions(bundleLocation, { chromiumOptions: browserOptions });
         const video = comps.find((c) => c.id === COMPOSITION_ID);
         if (!video) throw new Error("Composition not found");
 
-        console.log(`🚀 Rendering to ${OUTPUT_FILE}...`);
+        console.log(`🚀 Rendering to ${OUTPUT_FILE} (720p, Single Thread)...`);
         
         await renderMedia({
             composition: video,
             serveUrl: bundleLocation,
             codec: "h264",
             outputLocation: OUTPUT_FILE,
-            crf: 20,
+            crf: 23, // Slightly higher CRF for faster encode
             pixelFormat: 'yuv420p',
-            concurrency: os.cpus().length,
+            concurrency: 1, // FORCE SINGLE THREAD TO SAVE RAM
             chromiumOptions: browserOptions,
-            logLevel: 'info'
+            logLevel: 'verbose' // Show progress bar in logs
         });
         
         console.log(`✅ SUCCESS! Video saved: ${OUTPUT_FILE}`);
