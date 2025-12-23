@@ -24,7 +24,6 @@ const OUTPUT_FILE = `video-${timestamp}.mp4`;
 const TOTAL_DURATION_SEC = 79;
 const TOTAL_FRAMES = TOTAL_DURATION_SEC * VIDEO_FPS;
 
-// NOTE: Backticks inside this string ARE escaped (\`) because this is code being written to a file.
 const reactComponentCode = `
 import React from 'react';
 import {
@@ -159,17 +158,32 @@ const performRender = async () => {
     const entryPoint = path.join(tempDir, "index.tsx");
     await fs.writeFile(entryPoint, reactComponentCode);
 
+    // FIX: Add flags to prevent 'Target closed' error in CI/GitHub Actions
+    const browserOptions = {
+        headless: true,
+        gl: 'swangle', // Software graphics (no GPU)
+        args: [
+            '--no-sandbox',
+            '--disable-setuid-sandbox'
+        ]
+    };
+
     try {
         console.log("📦 Bundling project...");
         const bundleLocation = await bundle({ entryPoint, outDir: tempDir, webpackOverride: (c) => c });
-        const comps = await getCompositions(bundleLocation);
-        const video = comps.find((c) => c.id === COMPOSITION_ID);
         
-        // FIX: Removed invalid backslashes here
+        console.log("🎥 Identifying Composition (Scanning)...");
+        // FIX: Pass browserOptions here
+        const comps = await getCompositions(bundleLocation, {
+            chromiumOptions: browserOptions
+        });
+
+        const video = comps.find((c) => c.id === COMPOSITION_ID);
         if (!video) throw new Error("Composition not found");
 
         console.log(`🚀 Rendering to ${OUTPUT_FILE}...`);
         
+        // FIX: Pass browserOptions here as well
         await renderMedia({
             composition: video,
             serveUrl: bundleLocation,
@@ -178,9 +192,9 @@ const performRender = async () => {
             crf: 20,
             pixelFormat: 'yuv420p',
             concurrency: os.cpus().length,
+            chromiumOptions: browserOptions
         });
         
-        // FIX: Removed invalid backslashes here
         console.log(`✅ SUCCESS! Video saved: ${OUTPUT_FILE}`);
     } catch (err) {
         console.error("❌ Render Failed:", err);
